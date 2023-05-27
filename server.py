@@ -11,9 +11,17 @@ def get_ip_address():
     return s.getsockname()[0]
 
 
-players = 0
-player_one_choice = None
-player_two_choice = None
+players_count = 0
+players = {
+    1: {"id": 1, "wins": 0, "choice": None, "enemy": 2},
+    2: {"id": 2, "wins": 0, "choice": None, "enemy": 1},
+}
+
+win_states = {
+    "rock": {"win": "scissors"},
+    "paper": {"win": "rock"},
+    "scissors": {"win": "paper"}
+}
 
 player_one_reset = False
 player_two_reset = False
@@ -21,23 +29,31 @@ player_two_reset = False
 
 # Cuando un cliente se conecta, se le asigna un número de jugador
 def connection():
-    global players
-    players += 1
+    global players_count
+    players_count += 1
 
-    print(f"Client {players} connected")
+    print(f"Client {players_count} connected")
 
-    return players
+    return players_count
+
+
+def disconnect(player):
+    global players_count
+
+    players_count -= 1
+    players[1]["choice"] = None
+    players[2]["choice"] = None
+
+    print(f"Client {player} disconnected")
 
 
 # Cuando un cliente envía su elección, se guarda en una variable global
 def send_choice(player, choice):
-    global player_one_choice, player_two_choice
+    global players
+
     print("Choice received")
 
-    if player == 1:
-        player_one_choice = choice
-    else:
-        player_two_choice = choice
+    players[player]["choice"] = choice
 
     return choice
 
@@ -62,33 +78,30 @@ def reset_play(player):
     # Sí solo un jugador reseteó
     return "waiting"
 
+def reset_choice(player):
+    global players
+
+    players[player]["choice"] = None
+
+    return "reset"
+
 
 # Definir la lógica del juego
-def make_play():
-    global player_one_choice, player_two_choice
-    valid_choices = ["piedra", "papel", "tijeras"]
+def get_result(player):
+    global players_count, players
 
-    if player_one_choice is None or player_two_choice is None:
+    actual_player = players[player]
+    enemy_player = players[actual_player["enemy"]]
+
+    if not all([players[1]["choice"], players[2]["choice"]]):
         return "waiting"
 
-    if (
-        player_one_choice not in valid_choices
-        or player_two_choice not in valid_choices
-    ):
-        return (
-            "Jugada inválida. Las opciones válidas son: piedra, papel, tijeras."
-        )
-
-    if player_one_choice == player_two_choice:
-        result = "Empate"
-    elif (
-        (player_one_choice == "piedra" and player_two_choice == "tijeras")
-        or (player_one_choice == "papel" and player_two_choice == "piedra")
-        or (player_one_choice == "tijeras" and player_two_choice == "papel")
-    ):
-        result = "Jugador 1 gana"
+    if players[1]["choice"] == players[2]["choice"]:
+        result = "draw"
+    elif win_states[actual_player["choice"]]["win"] == enemy_player["choice"]:
+        result = "You win"
     else:
-        result = "Jugador 2 gana"
+        result = "You lose"
 
     return result
 
@@ -99,9 +112,10 @@ print(f"Server running on {get_ip_address()}:8000")
 
 # Registrar las funciones RPC del juego
 server.register_function(connection, "connection")
+server.register_function(disconnect, "disconnect")
 server.register_function(send_choice, "send_choice")
-server.register_function(make_play, "make_play")
-server.register_function(reset_play, "reset_play")
+server.register_function(get_result, "get_result")
+server.register_function(reset_choice, "reset_choice")
 
 # Servidor
 server.serve_forever()

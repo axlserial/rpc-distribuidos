@@ -1,16 +1,24 @@
-import xmlrpc.client
-import threading
+from xmlrpc.client import ServerProxy
+from threading import Thread
 
-client = xmlrpc.client.ServerProxy("http://localhost:5000/")
+# Conectar al servidor RPC
+server = ServerProxy("http://localhost:8000/")
 
-client.connect()
-client.send_choice()
-def get_response():
-	result = client.get_response()
-	print(result)
+# Obtener el número de player
+player = server.connection()
 
-thread = threading.Thread(target=get_response)
+def play():
+    global server, player
+    choice = input("Elige piedra, papel o tijeras: ")
+    server.send_choice(player, choice)
+
+    result = server.make_play()
+    while result == "waiting":
+        result = server.make_play()
+
+    print(result)
+
+# Hilo
+thread = Thread(target=play)
 thread.start()
-
-while True:
-    pass
+thread.join()

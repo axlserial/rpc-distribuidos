@@ -1,53 +1,92 @@
-# Servidor.py
 from xmlrpc.server import SimpleXMLRPCServer
-import threading
+
+players = 0
+player_one_choice = None
+player_two_choice = None
+
+player_one_reset = False
+player_two_reset = False
+
+# Cuando un cliente se conecta, se le asigna un número de jugador
+def connection():
+    global players
+    players += 1
+
+    print(f"Client {players} connected")
+
+    return players
+
+# Cuando un cliente envía su elección, se guarda en una variable global
+def send_choice(player, choice):
+    global player_one_choice, player_two_choice
+    print("Choice received")
+
+    if player == 1:
+        player_one_choice = choice
+    else:
+        player_two_choice = choice
+
+    return choice
+
+# Para reseteo de jugadas
+def reset_play(player):
+    global player_one_choice, player_two_choice
+    global player_one_reset, player_two_reset
+
+    if player == 1:
+        player_one_reset = True
+    else:
+        player_two_reset = True
+
+    if player_one_reset and player_two_reset:
+        player_one_choice = None
+        player_two_choice = None
+
+        # Sí ambos jugadores resetearon
+        return "reset"
+
+    # Sí solo un jugador reseteó
+    return "waiting"
+
+# Definir la lógica del juego
+def make_play():
+    global player_one_choice, player_two_choice
+    valid_choices = ["piedra", "papel", "tijeras"]
+
+    if player_one_choice is None or player_two_choice is None:
+        return "waiting"
+
+    if (
+        player_one_choice not in valid_choices
+        or player_two_choice not in valid_choices
+    ):
+        return (
+            "Jugada inválida. Las opciones válidas son: piedra, papel, tijeras."
+        )
+
+    if player_one_choice == player_two_choice:
+        result = "Empate"
+    elif (
+        (player_one_choice == "piedra" and player_two_choice == "tijeras")
+        or (player_one_choice == "papel" and player_two_choice == "piedra")
+        or (player_one_choice == "tijeras" and player_two_choice == "papel")
+    ):
+        result = "Jugador 1 gana"
+    else:
+        result = "Jugador 2 gana"
+
+    return result
 
 
-class OptionsHandler:
-    def __init__(self):
-        self.client_one_answer = None
-        self.client_two_answer = None
-        self.clients_connected = 0
-        self.clients_choices = []
-        self.event = threading.Event()
+# Crear el servidor RPC
+server = SimpleXMLRPCServer(("localhost", 8000))
+print("Servidor iniciado.")
 
-    def connect(self):
-        self.clients_connected += 1
-        print(f'Client {self.clients_connected} connected')
-        return 1
+# Registrar las funciones RPC del juego
+server.register_function(connection, "connection")
+server.register_function(send_choice, "send_choice")
+server.register_function(make_play, "make_play")
+server.register_function(reset_play, "reset_play")
 
-    def send_choice(self):
-        print('Choice received')
-        self.clients_choices.append(1)
-        return 1
-
-    def send_response(self):
-        self.event.set()
-
-    def get_response(self):
-        self.event.wait()
-        #return self.client_one_answer, self.client_two_answer
-        self.event.clear()
-        return 'yastan los dos'
-
-server = SimpleXMLRPCServer(("localhost", 5000))
-print('Server running on port 5000')
-
-options_handler = OptionsHandler()
-
-server.register_function(options_handler.connect, "connect")
-server.register_function(options_handler.send_choice, "send_choice")
-server.register_function(options_handler.get_response, "get_response")
-
-# def send_messages_async():
-#     while True:
-#         while len(options_handler.clients_choices) < 2:
-#             pass
-
-#         print('Sending messages')
-#         options_handler.send_response()
-
-# thread = threading.Thread(target=send_messages_async)
-# thread.start()
-
+# Servidor
 server.serve_forever()

@@ -1,4 +1,15 @@
+import socket
 from xmlrpc.server import SimpleXMLRPCServer
+
+
+def get_ip_address():
+    """Obtiene la dirección IP de la máquina"""
+    # return "192.168.195.179"
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    return s.getsockname()[0]
+
 
 players = 0
 player_one_choice = None
@@ -6,6 +17,7 @@ player_two_choice = None
 
 player_one_reset = False
 player_two_reset = False
+
 
 # Cuando un cliente se conecta, se le asigna un número de jugador
 def connection():
@@ -15,6 +27,7 @@ def connection():
     print(f"Client {players} connected")
 
     return players
+
 
 # Cuando un cliente envía su elección, se guarda en una variable global
 def send_choice(player, choice):
@@ -27,6 +40,7 @@ def send_choice(player, choice):
         player_two_choice = choice
 
     return choice
+
 
 # Para reseteo de jugadas
 def reset_play(player):
@@ -47,6 +61,7 @@ def reset_play(player):
 
     # Sí solo un jugador reseteó
     return "waiting"
+
 
 # Definir la lógica del juego
 def make_play():
@@ -79,8 +94,8 @@ def make_play():
 
 
 # Crear el servidor RPC
-server = SimpleXMLRPCServer(("localhost", 8000))
-print("Servidor iniciado.")
+server = SimpleXMLRPCServer((get_ip_address(), 8000))
+print(f"Server running on {get_ip_address()}:8000")
 
 # Registrar las funciones RPC del juego
 server.register_function(connection, "connection")

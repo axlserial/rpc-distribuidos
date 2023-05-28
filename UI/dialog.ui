@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>859</width>
-    <height>631</height>
+    <width>524</width>
+    <height>547</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,8 +20,8 @@
   <widget class="QLabel" name="image_label">
    <property name="geometry">
     <rect>
-     <x>220</x>
-     <y>40</y>
+     <x>70</x>
+     <y>0</y>
      <width>381</width>
      <height>361</height>
     </rect>
@@ -39,15 +39,30 @@
   <widget class="QWidget" name="gridLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>260</x>
-     <y>430</y>
-     <width>331</width>
-     <height>80</height>
+     <x>60</x>
+     <y>370</y>
+     <width>406</width>
+     <height>81</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout">
+    <property name="horizontalSpacing">
+     <number>30</number>
+    </property>
+    <property name="verticalSpacing">
+     <number>0</number>
+    </property>
     <item row="0" column="0">
      <widget class="QLabel" name="status_label">
+      <property name="font">
+       <font>
+        <family>Comic Sans MS</family>
+        <pointsize>26</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
       <property name="text">
        <string/>
       </property>
@@ -55,6 +70,15 @@
     </item>
     <item row="0" column="1">
      <widget class="QLabel" name="label_2">
+      <property name="font">
+       <font>
+        <family>Comic Sans MS</family>
+        <pointsize>26</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
+       </font>
+      </property>
       <property name="text">
        <string>la partida</string>
       </property>
@@ -65,11 +89,17 @@
   <widget class="QPushButton" name="exit_button">
    <property name="geometry">
     <rect>
-     <x>380</x>
-     <y>540</y>
-     <width>89</width>
-     <height>25</height>
+     <x>180</x>
+     <y>480</y>
+     <width>161</width>
+     <height>51</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Comic Sans MS</family>
+     <pointsize>18</pointsize>
+    </font>
    </property>
    <property name="text">
     <string>Salir</string>

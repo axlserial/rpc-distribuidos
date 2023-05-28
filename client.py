@@ -1,16 +1,8 @@
 from xmlrpc.client import ServerProxy
-from threading import Thread, current_thread
+from threading import Thread
 from PyQt5 import QtWidgets, uic
 from Dialog import Dialog
-from result_dialog import ResultDialog
 import sys
-
-# # Conectar al servidor RPC
-# server = ServerProxy("http://192.168.1.64:8000/")
-
-# # Obtener el número de player
-# player = server.connection()
-
 
 class Cliente(QtWidgets.QMainWindow):
     def __init__(self):
@@ -18,7 +10,7 @@ class Cliente(QtWidgets.QMainWindow):
 
         self.server = None
         self.player = None
-        self.thread = Thread(target=self.listenServer)
+        self.thread = None
         self.result = None
         self.round = 0
 
@@ -26,18 +18,35 @@ class Cliente(QtWidgets.QMainWindow):
         uic.loadUi("UI/client.ui", self)
 
         # Bind de los botones
-        self.button_ip.clicked.connect(self.iniciar_con)
+        self.button_ip.clicked.connect(self.start_game)
         self.scissors_button.clicked.connect(lambda _: self.choice_options('scissors'))
         self.paper_button.clicked.connect(lambda _: self.choice_options('paper'))
         self.rock_button.clicked.connect(lambda _: self.choice_options('rock'))
         self.show()
     
+
+    def enable_game_buttons(self):
+        self.rock_button.setEnabled(True)
+        self.paper_button.setEnabled(True)
+        self.scissors_button.setEnabled(True)
+
+        self.rock_label.setEnabled(True)
+        self.paper_label.setEnabled(True)
+        self.scissors_label.setEnabled(True)
     
-    
-    def listenServer(self):
-        print('escuchando', self.player)
-        result = self.server.get_result(self.player)
+    def disable_game_buttons(self):
+        self.rock_button.setEnabled(False)
+        self.paper_button.setEnabled(False)
+        self.scissors_button.setEnabled(False)
+
+        self.rock_label.setEnabled(False)
+        self.paper_label.setEnabled(False)
+        self.scissors_label.setEnabled(False)
         
+    def listenServer(self):
+        self.round_label.setText('Esperando al otro jugador...')
+
+        result = self.server.get_result(self.player)
         while result['result'] == "waiting":
             result = self.server.get_result(self.player)
             
@@ -59,12 +68,18 @@ class Cliente(QtWidgets.QMainWindow):
             self.round_label.setText('Empate')
 
         # Partida terminada
-        if result['winner'] != 'none':
-            ResultDialog(self)
+        if result['winner'] != 0:
+            if result['winner'] == self.player:
+                self.round_label.setText('GANASTE LA PARTIDA!!!')
+            else:
+                self.round_label.setText('PERDISTE LA PARTIDA :c')
+            self.disable_game_buttons()
+        else:
+            self.enable_game_buttons()
         
         return
 
-    def iniciar_con(self):
+    def start_game(self):
         # IP del servidor
         ip = self.input_ip.text()
 
@@ -93,14 +108,7 @@ class Cliente(QtWidgets.QMainWindow):
         Dialog("Partida Iniciada", self).exec_()
 
         # Habilitamos los botones y labels (piedra, papel, tijera)
-        
-        self.rock_button.setEnabled(True)
-        self.paper_button.setEnabled(True)
-        self.scissors_button.setEnabled(True)
-
-        self.rock_label.setEnabled(True)
-        self.paper_label.setEnabled(True)
-        self.scissors_label.setEnabled(True)
+        self.enable_game_buttons()
 
         # Deshabilitamos el botón de conectar
         self.button_ip.setEnabled(False)
@@ -109,8 +117,11 @@ class Cliente(QtWidgets.QMainWindow):
     def choice_options(self, choice):
         # Mandamos la opción que escogio el jugador
         self.server.send_choice(self.player, choice)
+        self.thread = Thread(target=self.listenServer)
         self.thread.start()
-        self.thread.join()
+
+        # Deshabilitamos los botones y labels (piedra, papel, tijera)
+        self.disable_game_buttons()
     
 
     
@@ -119,31 +130,3 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     window = Cliente()
     sys.exit(app.exec_())
-
-#---------------------------------------------------------------------------------------
-
-# def play():
-#     while True:
-#         global server, player
-#         server.reset_choice(player)
-#         choice = input("Choose rock, paper or scissors: ")
-#         server.send_choice(player, choice)
-
-#         result = server.get_result(player)
-#         while result == "waiting":
-#             result = server.get_result(player)
-
-#         print(result)
-
-#         wants_to_play = input("Do you want to play again? (y/n): ")
-#         if wants_to_play == "n":
-#             server.disconnect(player)
-#             break
-
-
-# # Hilo
-# thread = Thread(target=play)
-# thread.start()
-# thread.join()
-
-

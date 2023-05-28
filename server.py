@@ -1,5 +1,6 @@
 import socket
 from xmlrpc.server import SimpleXMLRPCServer
+import time
 
 
 def get_ip_address():
@@ -54,9 +55,17 @@ def send_choice(player, choice):
     print("Choice received")
 
     players[player]["choice"] = choice
+    if not all([players[1]["choice"], players[2]["choice"]]):
+        return choice
+
+    actual_player = players[player]
+    enemy_player = players[actual_player["enemy"]]
+    if win_states[actual_player["choice"]]["win"] == enemy_player["choice"]:
+        players[player]["wins"] += 1
+    elif actual_player["choice"] != enemy_player["choice"]:
+        enemy_player['wins'] += 1
 
     return choice
-
 
 # Para reseteo de jugadas
 def reset_play(player):
@@ -100,15 +109,15 @@ def get_result(player):
         result = "draw"
     elif win_states[actual_player["choice"]]["win"] == enemy_player["choice"]:
         result = "You win"
-        players[player]["wins"] += 1
     else:
         result = "You lose"
 
+    time.sleep(0.1)
     # Checar ganador final
-    final_winner = 'none'
+    final_winner = 0
     if result == "You win" and players[player]["wins"] == 3:
-        final_winner = player["id"]
-    elif result == "You lose" and players[enemy_player["id"]]["wins"] == 2:
+        final_winner = player
+    elif result == "You lose" and players[enemy_player["id"]]["wins"] == 3:
         final_winner = enemy_player["id"]
 
 

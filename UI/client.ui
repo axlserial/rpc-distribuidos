@@ -216,12 +216,12 @@
    </widget>
    <widget class="QWidget" name="gridLayoutWidget_2">
     <property name="enabled">
-     <bool>false</bool>
+     <bool>true</bool>
     </property>
     <property name="geometry">
      <rect>
       <x>90</x>
-      <y>300</y>
+      <y>310</y>
       <width>741</width>
       <height>251</height>
      </rect>
@@ -374,10 +374,13 @@
     </layout>
    </widget>
    <widget class="QLabel" name="round_label">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>190</x>
-      <y>560</y>
+      <y>570</y>
       <width>521</width>
       <height>61</height>
      </rect>

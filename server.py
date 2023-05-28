@@ -94,16 +94,25 @@ def get_result(player):
     enemy_player = players[actual_player["enemy"]]
 
     if not all([players[1]["choice"], players[2]["choice"]]):
-        return "waiting"
+        return {'result': "waiting", 'winner': 'none'}
 
     if players[1]["choice"] == players[2]["choice"]:
         result = "draw"
     elif win_states[actual_player["choice"]]["win"] == enemy_player["choice"]:
         result = "You win"
+        players[player]["wins"] += 1
     else:
         result = "You lose"
 
-    return result
+    # Checar ganador final
+    final_winner = 'none'
+    if result == "You win" and players[player]["wins"] == 3:
+        final_winner = player["id"]
+    elif result == "You lose" and players[enemy_player["id"]]["wins"] == 2:
+        final_winner = enemy_player["id"]
+
+
+    return { 'result': result, 'winner': final_winner, 'wins': players[player]["wins"]}
 
 
 # Crear el servidor RPC

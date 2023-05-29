@@ -21,7 +21,7 @@ players = {
 win_states = {
     "rock": {"win": "scissors"},
     "paper": {"win": "rock"},
-    "scissors": {"win": "paper"}
+    "scissors": {"win": "paper"},
 }
 
 player_one_reset = False
@@ -63,9 +63,10 @@ def send_choice(player, choice):
     if win_states[actual_player["choice"]]["win"] == enemy_player["choice"]:
         players[player]["wins"] += 1
     elif actual_player["choice"] != enemy_player["choice"]:
-        enemy_player['wins'] += 1
+        enemy_player["wins"] += 1
 
     return choice
+
 
 # Para reseteo de jugadas
 def reset_play(player):
@@ -87,6 +88,7 @@ def reset_play(player):
     # Sí solo un jugador reseteó
     return "waiting"
 
+
 def reset_choice(player):
     global players
 
@@ -103,7 +105,7 @@ def get_result(player):
     enemy_player = players[actual_player["enemy"]]
 
     if not all([players[1]["choice"], players[2]["choice"]]):
-        return {'result': "waiting", 'winner': 'none'}
+        return {"result": "waiting", "winner": "none"}
 
     if players[1]["choice"] == players[2]["choice"]:
         result = "draw"
@@ -120,8 +122,11 @@ def get_result(player):
     elif result == "You lose" and players[enemy_player["id"]]["wins"] == 3:
         final_winner = enemy_player["id"]
 
-
-    return { 'result': result, 'winner': final_winner, 'wins': players[player]["wins"]}
+    return {
+        "result": f"{result}|{actual_player['choice']}|{enemy_player['choice']}",
+        "winner": final_winner,
+        "wins": players[player]["wins"],
+    }
 
 
 # Crear el servidor RPC

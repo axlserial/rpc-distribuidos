@@ -166,3 +166,5 @@ Recived/*
 
 Files/*
 !Files/.gitkeep
+
+.vscode

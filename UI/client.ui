@@ -388,7 +388,7 @@
     <property name="font">
      <font>
       <family>Comic Sans MS</family>
-      <pointsize>20</pointsize>
+      <pointsize>14</pointsize>
       <weight>75</weight>
       <italic>true</italic>
       <bold>true</bold>
